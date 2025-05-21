@@ -26,7 +26,7 @@ app.use('/api/quotes' , require("./Routes/quotesRoutes"))
 app.use('/api/carti' , require('./Routes/cartiRoutes'))
 app.use('/api/autor' , require('./Routes/autorRoutes'))
 app.use('/api/admin' , require("./Routes/adminRoutes"))
-
+app.use('/api/user', require('./Routes/userRoutes')) 
 
 
 
