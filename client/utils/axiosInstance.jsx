@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8080/"; // schimbă dacă e nevoie
+const API_BASE_URL =  "https://infoeducatie2025-1.onrender.com/"; // schimbă dacă e nevoie
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
