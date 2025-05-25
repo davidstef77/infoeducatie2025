@@ -39,6 +39,7 @@ async function Register(req, res) {
             prenume: savedUser.prenume,
             nume: savedUser.nume,
             email: savedUser.email,
+            preferinteGen: savedUser.preferinteGen,
             creat: savedUser.creat
         };
 
@@ -93,6 +94,7 @@ async function Login(req, res) {
             prenume: user.prenume,
             nume: user.nume,
             email: user.email,
+            preferinteGen: user.preferinteGen,
             creat: user.creat
         };
 

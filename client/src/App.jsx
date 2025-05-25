@@ -7,8 +7,10 @@ import UserPage from './pages/UserPage';
 import Navbar from './components/NavBar';
 import { AuthProvider, useAuth } from '../context/authContext';
 import Biblioteca from './pages/Biblioteca';
-import ForYouPage from './pages/ForYouPage';
+
 import PaginaCarte  from './pages/PaginaCarte';
+import AutorPage from './pages/AutorPage';
+import ForYou from './pages/ForYou';
 
 // Componentă Layout pentru rutele protejate
 const ProtectedLayout = () => {
@@ -52,8 +54,9 @@ function App() {
             <Route path="/user" element={<UserPage />} />
             <Route path="/biblioteca" element={<Biblioteca />} />
             <Route path="/biblioteca/:id" element={<PaginaCarte />} />
+            <Route path="/biblioteca/autor/:id" element={<AutorPage/>} />
            
-            <Route path='/foryou' element={<ForYouPage/>}/>
+            <Route path='/foryou' element={<ForYou/>}/>
           </Route>
 
           {/* Redirect pentru rute necunoscute */}

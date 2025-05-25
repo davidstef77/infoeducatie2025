@@ -45,28 +45,12 @@ export const getCarteById = async (id) => {
 
 // Funcție pentru a posta o carte
 export const postCarte = async ({
-  text,
-  book,
-  autorul,
-  genul,
-  userId,
-  userName,
-  likes = 0,
-  comments = [],
-  createdAt = new Date()
+   Titlu, Autor, AnulAparitiei, Gen, coperta, Descriere
 }) => {
   try {
     const token = getToken();
     const response = await axiosInstance.post('api/carti/create', {
-      text,
-      book,
-      autorul,
-      genul,
-      userId,
-      userName,
-      likes,
-      comments,
-      createdAt
+       Titlu, Autor, AnulAparitiei, Gen, coperta, Descriere
     }, {
       headers: {
         Authorization: `Bearer ${token}`,

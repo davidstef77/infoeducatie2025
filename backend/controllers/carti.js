@@ -39,9 +39,9 @@ async function getAllBooks(req, res) {
 // Creează o nouă carte
 async function requestCreateBook(req, res) {
   try {
-    const { Titlu, Autor, AnulAparitiei, Gen, coperta } = req.body;
+    const { Titlu, Autor, Descriere, AnulAparitiei, Gen, coperta } = req.body;
 
-    const newBook = new Carte({ Titlu, Autor, AnulAparitiei, Gen, coperta });
+    const newBook = new Carte({ Titlu, Autor, AnulAparitiei, Gen, Descriere, coperta });
     const savedBook = await newBook.save();
 
     res.status(201).json({ message: 'Cartea a fost creată cu succes', data: savedBook });
@@ -76,15 +76,20 @@ async function deleteBook(req, res) {
     return res.status(500).json({ status: 'error', message: 'Eroare internă la ștergerea cărții' });
   }
 }
-
-// Adaugă comentariu
 async function addComentariu(req, res) {
-  const { id } = req.params;         // id-ul cărții
-  const { user, text } = req.body; // datele comentariului
+  const { id } = req.params; // id-ul cărții
+  const { user, text } = req.body;
 
-  if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(user)) {
-    return res.status(400).json({ message: 'ID invalid pentru carte sau utilizator' });
+  // Validări de bază
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'ID invalid pentru carte' });
   }
+
+  if (!user || !mongoose.Types.ObjectId.isValid(user)) {
+    return res.status(400).json({ message: 'ID invalid pentru utilizator' });
+  }
+
+
 
   try {
     const carte = await Carte.findById(id);
@@ -99,16 +104,16 @@ async function addComentariu(req, res) {
     });
     await comentariu.save();
 
+    // Adaugă comentariul la carte
     carte.comentarii.push(comentariu._id);
     await carte.save();
 
-    res.status(201).json({ message: 'Comentariu adăugat cu succes', comentariu });
+    return res.status(201).json({ message: 'Comentariu adăugat cu succes', comentariu });
   } catch (error) {
     console.error('Eroare la adăugarea comentariului:', error);
-    res.status(500).json({ message: 'Eroare la adăugarea comentariului' });
+    return res.status(500).json({ message: 'Eroare la adăugarea comentariului' });
   }
 }
-
 // Obține comentarii (nefolosit dacă le incluzi deja în getBook)
 async function getComentarii(req, res) {
   const { id } = req.params;

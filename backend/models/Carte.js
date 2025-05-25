@@ -13,6 +13,10 @@ const carteSchema = new Schema({
     ref: "Autor", 
     required: true,
   },
+  Descriere: {
+    type: String,
+    
+  },
   status: {
     type: String,
     enum: ['pending', 'approved'], // ✅ Status posibil
@@ -22,10 +26,7 @@ const carteSchema = new Schema({
     type: String,
     required: true
   },
-   likes: {
-    type: Number,
-    default: 0,  // Valoare implicită 0
-  },
+   
   
   Gen: {
     type: String,
