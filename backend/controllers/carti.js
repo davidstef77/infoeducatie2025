@@ -13,7 +13,8 @@ async function getBook(req, res) {
   try {
     const book = await Carte.findById(id)
       .populate('quotes') // Populează quotes-urile cărții
-      .populate('Autor', 'nume') // (opțional) Populează numele autorului
+      .populate('Autor', ' prenume nume' ,) // (opțional) Populează numele autorului
+      
       .populate('comentarii' , 'text' );
 
     if (!book) {

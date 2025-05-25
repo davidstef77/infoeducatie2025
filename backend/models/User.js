@@ -33,7 +33,7 @@ const userSchema = new Schema({
     type: String,
     enum: [
       "Stoicism",
-      "Dezvoltare Personală",
+      "Dezvoltare Personala",
       "Motivational",
       "Business",
       "Spiritualitate",

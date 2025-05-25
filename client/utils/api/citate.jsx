@@ -46,6 +46,23 @@ export const getCitate = async (id) => {
     };
   }};
 
+  export const getCitateByUserId = async (userId) => {
+  try {
+    const token = getToken();
+    const response = await axiosInstance.get(`api/quotes/user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching quotes by user ID:", error.response ? error.response.data : error.message);
+    return {
+      error: error.response ? error.response.data.message : "A apărut o eroare la obținerea citatelor pentru utilizator.",
+      status: error.response ? error.response.status : 500,
+    };
+  }};
+
 // Funcție pentru a posta un citat
 export const postCitat = async ({
   text,

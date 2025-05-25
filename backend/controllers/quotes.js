@@ -144,6 +144,36 @@ async function toggleLikes(req, res) {
   }
 }
 
+
+async function getQuotesByUserId(req, res, next) {
+  const { userId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "ID invalid" });
+  }
+
+  try {
+    const quotes = await Quote.find({ userId }).populate('userId', 'nume');
+    if (quotes.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "Nu s-au găsit citate pentru acest utilizator"
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: quotes
+    });
+  } catch (error) {
+    console.error("Eroare la căutarea citatelor", error);
+    return next(error);
+  }
+}
+
+
+
+
 async function toggleComments(req, res, next) {
   const { id } = req.params;
   const { userId, userName, comment } = req.body;
@@ -224,5 +254,6 @@ module.exports = {
   toggleLikes,
   toggleComments,
   saveQuote,
+  getQuotesByUserId,
   
 };

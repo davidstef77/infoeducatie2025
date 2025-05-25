@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
 
 const GENURI = [
-  "Stoicism", "Dezvoltare Personală", "Motivational", "Business",
+  "Stoicism", "Dezvoltare Personala", "Motivational", "Business",
   "Spiritualitate", "Istorie", "Religie", "Filosofie", "Politica",
   "Psihologie", "Educatie", "Romantism", "Literatura", "Poezie",
   "Drama", "Comedie"

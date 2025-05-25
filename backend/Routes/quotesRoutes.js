@@ -9,6 +9,7 @@ const {
   toggleLikes,  // Corrected the name to match the controller function
   toggleComments ,
   saveQuote,
+  getQuotesByUserId,
 } = require('../controllers/quotes');
 
 // Route pentru crearea unui citat
@@ -16,6 +17,8 @@ router.post('/create', isAuthenticated, createQuotes);
 
 
 router.get('/:id', isAuthenticated,  getQuotes);
+router.get('/user/:userId', isAuthenticated , getQuotesByUserId);
+
  // Added the save route
 
 

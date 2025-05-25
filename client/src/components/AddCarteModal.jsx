@@ -9,8 +9,8 @@ export default function AddCarteModal({ onClose }) {
   const { user } = useAuth();
   const dropdownRef = useRef(null);
 
-  const GenURI = [
-    "Stoicism", "Dezvoltare Personală", "Motivațional", "Business",
+  const genulURI = [
+    "Stoicism", "Dezvoltare Personala", "Motivațional", "Business",
     "Spiritualitate", "Istorie", "Religie", "Filosofie", "Politica",
     "Psihologie", "Educatie", "Romantism", "Literatură", "Poezie",
     "Dramă", "Comedie"
@@ -18,7 +18,7 @@ export default function AddCarteModal({ onClose }) {
 
   const [formData, setFormData] = useState({
     Titlu: '',
-    Gen: '',
+    genul: '',
     Autor: '',
     Descriere: '',
     coperta: '',
@@ -63,9 +63,9 @@ export default function AddCarteModal({ onClose }) {
 
   const handleAddSubmit = async (e) => {
     e.preventDefault();
-    const { Titlu, Gen, Autor, Descriere, coperta, AnulAparitiei } = formData;
+    const { Titlu, genul, Autor, Descriere, coperta, AnulAparitiei } = formData;
 
-    if (!Titlu.trim() || !Gen || !Autor || !Descriere.trim() || !coperta.trim() || !AnulAparitiei) {
+    if (!Titlu.trim() || !genul || !Autor || !Descriere.trim() || !coperta.trim() || !AnulAparitiei) {
       alert('Completează toate câmpurile.');
       return;
     }
@@ -106,15 +106,15 @@ export default function AddCarteModal({ onClose }) {
           />
 
           <select
-            name="Gen"
-            value={formData.Gen}
+            name="genul"
+            value={formData.genul}
             onChange={handleChange}
             className="w-full bg-gray-700 rounded-lg p-3"
             required
           >
-            <option value="">Alege Genul</option>
-            {GenURI.map((Gen) => (
-              <option key={Gen} value={Gen}>{Gen}</option>
+            <option value="">Alege genulul</option>
+            {genulURI.map((genul) => (
+              <option key={genul} value={genul}>{genul}</option>
             ))}
           </select>
           <input

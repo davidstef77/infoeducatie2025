@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookmarkIcon, BookOpenIcon, UserIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
-import { BookmarkIcon as BookmarkSolid, BookOpenIcon as BookOpenSolid } from '@heroicons/react/24/solid';
+import { BookmarkIcon, BookOpenIcon, UserIcon, ArrowRightOnRectangleIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import { BookmarkIcon as BookmarkSolid, BookOpenIcon as BookOpenSolid, PencilSquareIcon as PencilSquareIconSolid } from '@heroicons/react/24/solid';
 import AuthContext from '../../context/authContext';
 import Navbar from '../components/NavBar';
 import  Loading from '../components/Loading';
 import { getCitatesiCartiSalvate } from "../../utils/api/userApi";
+import { getCitateByUserId } from '../../utils/api/citate';
 import { getAutorById } from '../../utils/api/autorApi';
 
 const ITEMS_PER_PAGE = 10;
@@ -16,6 +17,7 @@ export default function UserPage() {
   const [activeTab, setActiveTab] = useState('citate');
   const [savedCitate, setSavedCitate] = useState([]);
   const [savedCarti, setSavedCarti] = useState([]);
+  const [userCitate, setUserCitate] = useState([]); // New state for user's created quotes
   const [autoriMap, setAutoriMap] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -27,6 +29,22 @@ export default function UserPage() {
     logout();
     navigate('/login', { replace: true });
   };
+
+  // Complete the fetchCitatebyUserId function
+  const fetchCitatebyUserId = async (userId) => {
+  try {
+    const response = await getCitateByUserId(userId);
+    // EXTRAGEM ARRAY-UL DIN response.data
+    const quotesArray = Array.isArray(response.data) ? response.data : [];
+    setUserCitate(quotesArray);
+    
+    return quotesArray;
+  } catch (error) {
+    console.error("Eroare la încărcarea citatelor utilizatorului:", error);
+    setUserCitate([]);
+    return [];
+  }
+};
 
   const fetchSavedData = async (userId) => {
     try {
@@ -63,7 +81,13 @@ export default function UserPage() {
         const parsed = JSON.parse(storedUser);
         if (!parsed?.user) throw new Error("Date utilizator invalide");
         setUser(parsed.user);
-        await fetchSavedData(parsed.user._id);
+        
+        // Fetch both saved data and user's created quotes
+        await Promise.all([
+          fetchSavedData(parsed.user._id),
+          fetchCitatebyUserId(parsed.user._id)
+        ]);
+        
       } catch (err) {
         console.error("Eroare la parse user:", err);
         navigate('/login');
@@ -81,16 +105,27 @@ export default function UserPage() {
   }, [activeTab]);
 
   const paginate = (items) => {
+    // Ensure items is always an array
+    const safeItems = Array.isArray(items) ? items : [];
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return items.slice(start, start + ITEMS_PER_PAGE);
+    return safeItems.slice(start, start + ITEMS_PER_PAGE);
   };
 
-  const totalPages = (activeTab === 'citate'
-    ? Math.ceil(savedCitate.length / ITEMS_PER_PAGE)
-    : Math.ceil(savedCarti.length / ITEMS_PER_PAGE));
+  const totalPages = () => {
+    switch(activeTab) {
+      case 'citate':
+        return Math.ceil((Array.isArray(savedCitate) ? savedCitate.length : 0) / ITEMS_PER_PAGE);
+      case 'carti':
+        return Math.ceil((Array.isArray(savedCarti) ? savedCarti.length : 0) / ITEMS_PER_PAGE);
+      case 'citate-mele':
+        return Math.ceil((Array.isArray(userCitate) ? userCitate.length : 0) / ITEMS_PER_PAGE);
+      default:
+        return 1;
+    }
+  };
 
   const handlePrevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
-  const handleNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  const handleNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages()));
 
   if (loading) {
     return (
@@ -161,11 +196,15 @@ export default function UserPage() {
                   <div className="flex items-center gap-6 text-white/60">
                     <div className="flex items-center gap-2">
                       <BookmarkSolid className="w-5 h-5 text-purple-400" />
-                      <span className="font-medium">{savedCitate.length} citate</span>
+                      <span className="font-medium">{Array.isArray(savedCitate) ? savedCitate.length : 0} salvate</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <BookOpenSolid className="w-5 h-5 text-blue-400" />
-                      <span className="font-medium">{savedCarti.length} cărți</span>
+                      <span className="font-medium">{Array.isArray(savedCarti) ? savedCarti.length : 0} cărți</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <PencilSquareIconSolid className="w-5 h-5 text-green-400" />
+                      <span className="font-medium">{Array.isArray(userCitate) ? userCitate.length : 0} create</span>
                     </div>
                   </div>
                   
@@ -185,8 +224,9 @@ export default function UserPage() {
           <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-2 mb-8 shadow-xl">
             <div className="flex">
               {[
-                { key: 'citate', label: 'Citate Salvate', icon: BookmarkIcon, solidIcon: BookmarkSolid, count: savedCitate.length },
-                { key: 'carti', label: 'Cărți Salvate', icon: BookOpenIcon, solidIcon: BookOpenSolid, count: savedCarti.length }
+                { key: 'citate', label: 'Citate Salvate', icon: BookmarkIcon, solidIcon: BookmarkSolid, count: Array.isArray(savedCitate) ? savedCitate.length : 0 },
+                { key: 'carti', label: 'Cărți Salvate', icon: BookOpenIcon, solidIcon: BookOpenSolid, count: Array.isArray(savedCarti) ? savedCarti.length : 0 },
+                { key: 'citate-mele', label: 'Citatele Mele', icon: PencilSquareIcon, solidIcon: PencilSquareIconSolid, count: Array.isArray(userCitate) ? userCitate.length : 0 }
               ].map(({ key, label, icon: Icon, solidIcon: SolidIcon, count }) => (
                 <button
                   key={key}
@@ -202,7 +242,8 @@ export default function UserPage() {
                   ) : (
                     <Icon className="w-5 h-5" />
                   )}
-                  <span>{label}</span>
+                  <span className="hidden sm:inline">{label}</span>
+                  <span className="sm:hidden">{key === 'citate' ? 'Salvate' : key === 'carti' ? 'Cărți' : 'Mele'}</span>
                   <span className={`px-2 py-1 rounded-full text-xs ${
                     activeTab === key 
                       ? 'bg-white/20 text-white' 
@@ -217,6 +258,7 @@ export default function UserPage() {
 
           {/* Enhanced Content */}
           <div className="text-white">
+            {/* Saved Quotes Tab */}
             {activeTab === 'citate' && (
               <div className="space-y-6">
                 {paginate(savedCitate).length > 0 ? (
@@ -224,9 +266,7 @@ export default function UserPage() {
                     <div key={index} className="group bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:bg-white/10 transition-all duration-300">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-gradient-to-tr from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-purple-500/30">
-                          <svg className="w-6 h-6 text-purple-300" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
-                          </svg>
+                          <BookmarkSolid className="w-6 h-6 text-purple-300" />
                         </div>
                         <div className="flex-1">
                           <blockquote className="text-lg italic text-white/90 leading-relaxed mb-3">
@@ -253,6 +293,46 @@ export default function UserPage() {
               </div>
             )}
 
+            {/* User's Created Quotes Tab */}
+            {activeTab === 'citate-mele' && (
+  <div className="space-y-6">
+    {paginate(userCitate).length > 0 ? (
+      paginate(userCitate).map((citat, index) => (
+        <div
+          key={index}
+          className="group bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:bg-white/10 transition-all duration-300"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-gradient-to-tr from-green-500/20 to-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-green-500/30">
+              <PencilSquareIconSolid className="w-6 h-6 text-green-300" />
+            </div>
+            <div className="flex-1">
+              <blockquote className="text-lg italic text-white/90 leading-relaxed mb-3">
+                "{citat.text}"
+              </blockquote>
+              {citat.autor && (
+                <cite className="text-sm text-green-300 font-medium not-italic">
+                  — {citat.autor}
+                </cite>
+              )}
+            </div>
+          </div>
+        </div>
+      ))
+    ) : (
+      <div className="text-center py-16">
+        <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-12 max-w-md mx-auto">
+          <PencilSquareIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white/80 mb-2">Niciun citat creat</h3>
+          <p className="text-white/50">
+            Începe să creezi propriile citate pentru a le vedea aici.
+          </p>
+        </div>
+      </div>
+    )}
+  </div>
+)}
+            {/* Saved Books Tab */}
             {activeTab === 'carti' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginate(savedCarti).length > 0 ? (
@@ -302,7 +382,7 @@ export default function UserPage() {
             )}
 
             {/* Enhanced Pagination */}
-            {totalPages > 1 && (
+            {totalPages() > 1 && (
               <div className="flex justify-center mt-12">
                 <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 shadow-xl">
                   <div className="flex items-center gap-3">
@@ -317,7 +397,7 @@ export default function UserPage() {
                     </button>
                     
                     <div className="flex items-center gap-2">
-                      {[...Array(Math.min(totalPages, 5))].map((_, i) => {
+                      {[...Array(Math.min(totalPages(), 5))].map((_, i) => {
                         const pageNum = i + 1;
                         return (
                           <button
@@ -337,7 +417,7 @@ export default function UserPage() {
 
                     <button
                       onClick={handleNextPage}
-                      disabled={currentPage === totalPages}
+                      disabled={currentPage === totalPages()}
                       className="p-3 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-white/20"
                     >
                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -347,7 +427,7 @@ export default function UserPage() {
                   </div>
                   
                   <div className="text-center mt-3 text-white/60 text-sm">
-                    Pagina {currentPage} din {totalPages}
+                    Pagina {currentPage} din {totalPages()}
                   </div>
                 </div>
               </div>
