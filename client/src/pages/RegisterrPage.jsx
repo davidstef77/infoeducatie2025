@@ -17,7 +17,7 @@ export default function RegisterPage() {
 
   const genuri = [
     "Stoicism",
-      "Dezvoltare Personală",
+      "Dezvoltare Personala",
       "Motivational",
       "Business",
       "Spiritualitate",
