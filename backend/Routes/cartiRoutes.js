@@ -19,7 +19,7 @@ const { isAdmin, isAuthenticated } = require('../middleware/verificareUser');
 // 📚 Cărți
 router.get('/', getAllBooks);
 router.get('/:id', getBook);
-router.post('/create', isAuthenticated, requestCreateBook); // Adaugă verificare admin în controller dacă nu o faci aici
+router.post('/create',  requestCreateBook); // Adaugă verificare admin în controller dacă nu o faci aici
 router.delete('/:id',isAuthenticated, deleteBook);
 
 // 💬 Comentarii

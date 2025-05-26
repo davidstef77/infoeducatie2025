@@ -5,20 +5,32 @@ import { getAutori } from '../../utils/api/autorApi';
 import { useNavigate } from 'react-router-dom';
 
 export default function AddCarteModal({ onClose }) {
- const navigate = useNavigate();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const dropdownRef = useRef(null);
 
-  const genulURI = [
-    "Stoicism", "Dezvoltare Personala", "Motivațional", "Business",
-    "Spiritualitate", "Istorie", "Religie", "Filosofie", "Politica",
-    "Psihologie", "Educatie", "Romantism", "Literatură", "Poezie",
-    "Dramă", "Comedie"
+  const GenURI = [
+    "Stoicism",
+    "Dezvoltare Personală",
+    "Motivational",
+    "Business",
+    "Spiritualitate",
+    "Istorie",
+    "Religie",
+    "Filosofie",
+    "Politica",
+    "Psihologie",
+    "Educatie",
+    "Romantism",
+    "Literatura",
+    "Poezie",
+    "Drama",
+    "Comedie"
   ];
 
   const [formData, setFormData] = useState({
     Titlu: '',
-    genul: '',
+    Gen: '',
     Autor: '',
     Descriere: '',
     coperta: '',
@@ -27,6 +39,7 @@ export default function AddCarteModal({ onClose }) {
 
   const [Autori, setAutori] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -63,10 +76,17 @@ export default function AddCarteModal({ onClose }) {
 
   const handleAddSubmit = async (e) => {
     e.preventDefault();
-    const { Titlu, genul, Autor, Descriere, coperta, AnulAparitiei } = formData;
 
-    if (!Titlu.trim() || !genul || !Autor || !Descriere.trim() || !coperta.trim() || !AnulAparitiei) {
+    const { Titlu, Gen, Autor, Descriere, coperta, AnulAparitiei } = formData;
+
+    if (!Titlu.trim() || !Gen || !Autor || !Descriere.trim() || !coperta.trim() || !AnulAparitiei) {
       alert('Completează toate câmpurile.');
+      return;
+    }
+
+    // Verificare că Autor este valid (există în lista Autori)
+    if (!Autori.some(a => a._id === Autor)) {
+      alert('Selectează un autor din listă.');
       return;
     }
 
@@ -75,13 +95,28 @@ export default function AddCarteModal({ onClose }) {
       return;
     }
 
+    setSubmitting(true);
     try {
       await postCarte(formData);
       alert('Cererea de adăugare a fost trimisă cu succes!');
+
+      // Reset formular și căutare
+      setFormData({
+        Titlu: '',
+        Gen: '',
+        Autor: '',
+        Descriere: '',
+        coperta: '',
+        AnulAparitiei: ''
+      });
+      setSearchQuery('');
+
       navigate('/user');
     } catch (error) {
       console.error(error);
       alert('Eroare la trimiterea cererii.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -106,27 +141,27 @@ export default function AddCarteModal({ onClose }) {
           />
 
           <select
-            name="genul"
-            value={formData.genul}
+            name="Gen"
+            value={formData.Gen}
             onChange={handleChange}
             className="w-full bg-gray-700 rounded-lg p-3"
             required
           >
-            <option value="">Alege genulul</option>
-            {genulURI.map((genul) => (
-              <option key={genul} value={genul}>{genul}</option>
+            <option value="">Alege Gen</option>
+            {GenURI.map((Gen) => (
+              <option key={Gen} value={Gen}>{Gen}</option>
             ))}
           </select>
-          <input
-  type="number"
-  name="AnulAparitiei"
-  placeholder="Anul apariției"
-  value={formData.AnulAparitiei}
-  onChange={handleChange}
-  className="w-full bg-gray-700 rounded-lg p-3"
-  required
-/>
 
+          <input
+            type="number"
+            name="AnulAparitiei"
+            placeholder="Anul apariției"
+            value={formData.AnulAparitiei}
+            onChange={handleChange}
+            className="w-full bg-gray-700 rounded-lg p-3"
+            required
+          />
 
           <div className="relative" ref={dropdownRef}>
             <input
@@ -136,7 +171,9 @@ export default function AddCarteModal({ onClose }) {
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setIsDropdownOpen(true);
-                if (formData.Autor) setFormData(prev => ({ ...prev, Autor: '' }));
+                if (formData.Autor && !e.target.value) {
+                  setFormData(prev => ({ ...prev, Autor: '' }));
+                }
               }}
               onFocus={() => setIsDropdownOpen(true)}
               className="w-full bg-gray-700 rounded-lg p-3"
@@ -195,9 +232,9 @@ export default function AddCarteModal({ onClose }) {
             <button
               type="submit"
               className="px-4 py-2 bg-purple-500 rounded-lg hover:bg-purple-600"
-              disabled={loading}
+              disabled={loading || submitting}
             >
-              {loading ? 'Se încarcă...' : 'Trimite'}
+              {submitting ? 'Se trimite...' : 'Trimite'}
             </button>
           </div>
         </form>
