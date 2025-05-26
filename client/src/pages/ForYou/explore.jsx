@@ -1,4 +1,4 @@
-// frontend/src/pages/ForYou/Explorepage.jsx
+
 import React, { useEffect, useState } from 'react';
 import { getAllCitate, saveCitat } from '../../../utils/api/citate';
 import { getCarteById } from '../../../utils/api/cartiApi';
@@ -139,7 +139,7 @@ export default function Explorepage() {
                         </Link>
                         <p className="mt-2 text-gray-600">
                           de <span className="font-semibold">{citat.book?.Autor?.prenume || "Autor Anonim"}</span>{' '}
-                          <span className="font-semibold">{citat.book?.Autor?.nume || ""}</span>
+                          <span className="font-semibold">{citat.book?.Autor?.prenume || ""}</span>
                         </p>
                       </div>
 
