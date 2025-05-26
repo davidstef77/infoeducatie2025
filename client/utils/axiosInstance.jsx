@@ -4,7 +4,7 @@ const API_BASE_URL =  "https://infoeducatie2025-1.onrender.com/"; // schimbă da
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 5000,
+  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },

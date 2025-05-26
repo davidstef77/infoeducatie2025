@@ -1,4 +1,3 @@
-// frontend/src/pages/ForYou/ForYouPage.jsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Loading from '../../components/Loading';
@@ -13,8 +12,7 @@ export default function ForYouPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (authLoading) return;     // wait until we know auth status
-    if (!user) return;           // if no user, don't fetch
+    if (authLoading || !user) return;
 
     const authUser = user.user ?? user;
     const preferinteGen = typeof authUser.preferinteGen === 'string'
@@ -30,20 +28,21 @@ export default function ForYouPage() {
           rawC.map(async c => {
             try {
               const { data: book } = await getCarteById(c.bookId);
-              const genres = book.Gen
-                .toLowerCase()
-                .split(',')
-                .map(x => x.trim());
+              const genres = book.Gen.toLowerCase().split(',').map(g => g.trim());
               if (genres.some(g => preferinteGen.includes(g))) {
                 return { ...c, book };
               }
-            } catch { /* ignore individual failures */ }
+            } catch (err) {
+              console.warn(`Carte ${c.bookId} indisponibilă:`, err.message);
+              return null;
+            }
             return null;
           })
         );
 
         setCitate(filtered.filter(Boolean));
-      } catch {
+      } catch (err) {
+        console.error('Eroare la citate:', err);
         setError('Nu s-au putut încărca citatele.');
       } finally {
         setLoading(false);
@@ -55,16 +54,12 @@ export default function ForYouPage() {
 
   const handleSave = async (quoteId) => {
     const res = await saveCitat(quoteId);
-    if (res.error) {
-      alert(`Eroare la salvare: ${res.error}`);
-    } else {
-      alert('Citat salvat cu succes!');
-    }
+    alert(res.error ? `Eroare la salvare: ${res.error}` : 'Citat salvat cu succes!');
   };
 
   if (authLoading || loading) return <Loading />;
-  if (!user)            return <div className="text-center text-gray-600">Te rugăm să te autentifici.</div>;
-  if (error)            return <div className="text-center text-red-500">{error}</div>;
+  if (!user) return <div className="text-center text-gray-600">Te rugăm să te autentifici.</div>;
+  if (error) return <div className="text-center text-red-500">{error}</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-blue-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -82,7 +77,6 @@ export default function ForYouPage() {
             {citate.map(c => (
               <article key={c._id} className="group bg-white rounded-2xl shadow-sm hover:shadow-md ">
                 <div className="flex flex-col sm:flex-row gap-6 p-8">
-                  {/* Copertă */}
                   <div className="sm:w-48 w-full sm:h-64 h-48 rounded-xl overflow-hidden bg-gray-100">
                     {c.book?.coperta ? (
                       <img
@@ -99,7 +93,6 @@ export default function ForYouPage() {
                     )}
                   </div>
 
-                  {/* Conținut citat */}
                   <div className="flex-1">
                     <blockquote className="text-2xl italic font-serif text-gray-800 mb-6">
                       „{c.text}”
@@ -116,33 +109,19 @@ export default function ForYouPage() {
                           <span className="font-medium text-gray-900">{c.book.Titlu}</span>
                         </Link>
                         <p className="mt-2 text-gray-600">
-                          de{' '}
-                          <span className="font-semibold">
-                            {c.book.Autor.prenume} {c.book.Autor.nume}
-                          </span>
+                          de <span className="font-semibold">{c.book.Autor.prenume} {c.book.Autor.nume}</span>
                         </p>
                         <p className="text-sm text-gray-500 mt-1">Gen: {c.book.Gen}</p>
                       </div>
-                     <button
-  onClick={() => handleSave(c._id)}
-  className="self-start sm:self-auto mt-4 sm:mt-0 w-10 h-10 flex items-center justify-center bg-purple-600 text-white rounded-full hover:bg-purple-700 transition"
-  aria-label="Salvează citatul"
->
-  <svg
-    className="w-6 h-6"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-    />
-  </svg>
-</button>
+                      <button
+                        onClick={() => handleSave(c._id)}
+                        className="self-start sm:self-auto mt-4 sm:mt-0 w-10 h-10 flex items-center justify-center bg-purple-600 text-white rounded-full hover:bg-purple-700 transition"
+                        aria-label="Salvează citatul"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 </div>

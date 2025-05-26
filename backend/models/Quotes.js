@@ -26,6 +26,7 @@ const quoteSchema = new Schema({
     type: String,
     enum: [
       "Stoicism",
+      
       "Dezvoltare Personala",
       "Motivational",
       "Business",
