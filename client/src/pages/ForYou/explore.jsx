@@ -139,7 +139,7 @@ export default function Explorepage() {
                         </Link>
                         <p className="mt-2 text-gray-600">
                           de <span className="font-semibold">{citat.book?.Autor?.prenume || "Autor Anonim"}</span>{' '}
-                          <span className="font-semibold">{citat.book?.Autor?.prenume || ""}</span>
+                          <span className="font-semibold">{citat.book?.Autor?.nume || ""}</span>
                         </p>
                       </div>
 
