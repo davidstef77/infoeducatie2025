@@ -26,23 +26,20 @@ export default function ForYouPage() {
 
         const filtered = await Promise.all(
           rawC.map(async c => {
+            const genres = c.genul.toLowerCase().split(',').map(g => g.trim());
+            if (!genres.some(g => preferinteGen.includes(g))) return null;
+
             try {
               const { data: book } = await getCarteById(c.bookId);
-              const genres = book.Gen.toLowerCase().split(',').map(g => g.trim());
-              if (genres.some(g => preferinteGen.includes(g))) {
-                return { ...c, book };
-              }
-            } catch (err) {
-              console.warn(`Carte ${c.bookId} indisponibilă:`, err.message);
+              return { ...c, book };
+            } catch {
               return null;
             }
-            return null;
           })
         );
 
         setCitate(filtered.filter(Boolean));
-      } catch (err) {
-        console.error('Eroare la citate:', err);
+      } catch {
         setError('Nu s-au putut încărca citatele.');
       } finally {
         setLoading(false);
@@ -54,7 +51,11 @@ export default function ForYouPage() {
 
   const handleSave = async (quoteId) => {
     const res = await saveCitat(quoteId);
-    alert(res.error ? `Eroare la salvare: ${res.error}` : 'Citat salvat cu succes!');
+    if (res.error) {
+      alert(`Eroare la salvare: ${res.error}`);
+    } else {
+      alert('Citat salvat cu succes!');
+    }
   };
 
   if (authLoading || loading) return <Loading />;
@@ -99,27 +100,47 @@ export default function ForYouPage() {
                     </blockquote>
                     <div className="border-t border-gray-100 pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div>
-                        <Link
-                          to={`/carte/${c.book._id}`}
-                          className="inline-flex items-center gap-2 hover:text-blue-600"
-                        >
-                          <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                          </svg>
-                          <span className="font-medium text-gray-900">{c.book.Titlu}</span>
-                        </Link>
-                        <p className="mt-2 text-gray-600">
-                          de <span className="font-semibold">{c.book.Autor.prenume} {c.book.Autor.nume}</span>
-                        </p>
-                        <p className="text-sm text-gray-500 mt-1">Gen: {c.book.Gen}</p>
+                        {c.book ? (
+                          <>
+                            <Link
+                              to={`/carte/${c.book._id}`}
+                              className="inline-flex items-center gap-2 hover:text-blue-600"
+                            >
+                              <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                              <span className="font-medium text-gray-900">{c.book.Titlu}</span>
+                            </Link>
+                            <p className="mt-2 text-gray-600">
+                              de{' '}
+                              <span className="font-semibold">
+                                {c.book.Autor.prenume} {c.book.Autor.nume}
+                              </span>
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">Gen: {c.genul}</p>
+                          </>
+                        ) : (
+                          <p className="text-sm text-gray-400">Carte indisponibilă</p>
+                        )}
                       </div>
                       <button
                         onClick={() => handleSave(c._id)}
                         className="self-start sm:self-auto mt-4 sm:mt-0 w-10 h-10 flex items-center justify-center bg-purple-600 text-white rounded-full hover:bg-purple-700 transition"
                         aria-label="Salvează citatul"
                       >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        <svg
+                          className="w-6 h-6"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                          />
                         </svg>
                       </button>
                     </div>
