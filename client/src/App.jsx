@@ -7,8 +7,8 @@ import UserPage from './pages/UserPage';
 import Navbar from './components/NavBar';
 import { AuthProvider, useAuth } from '../context/authContext';
 import Biblioteca from './pages/Biblioteca';
-
-import PaginaCarte  from './pages/PaginaCarte';
+// Corrected import statement (removed non-breaking space)
+import PaginaCarte from './pages/PaginaCarte';
 import AutorPage from './pages/AutorPage';
 import ForYou from './pages/ForYou';
 
@@ -53,10 +53,12 @@ function App() {
           <Route element={<ProtectedLayout />}>
             <Route path="/user" element={<UserPage />} />
             <Route path="/biblioteca" element={<Biblioteca />} />
+            
+            {/* ⚠️ FIX: The more specific route must come first */}
+            <Route path="/biblioteca/autor/:id" element={<AutorPage />} />
             <Route path="/biblioteca/:id" element={<PaginaCarte />} />
-            <Route path="/biblioteca/autor/:id" element={<AutorPage/>} />
-           
-            <Route path='/foryou' element={<ForYou/>}/>
+            
+            <Route path='/foryou' element={<ForYou />} />
           </Route>
 
           {/* Redirect pentru rute necunoscute */}
